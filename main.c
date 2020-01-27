@@ -1,3 +1,4 @@
+
 /*
  * Lab1.c
  *
@@ -8,29 +9,36 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <math.h>
 
 #define SCC_0 0x1551
 #define SCC_1 0x0110
-#define SCC_2 0x11d1
-#define SCC_3 0x11c1
-#define SCC_4 0x05b0
-#define SCC_5 0x04b1
-#define SCC_6 0x14b1
-#define SCC_7 0x1110
-#define SCC_8 0x15f1
-#define SCC_9 0x15b1
+#define SCC_2 0x1E11
+#define SCC_3 0x1b11
+#define SCC_4 0x0b50
+#define SCC_5 0x1b41
+#define SCC_6 0x1F41
+#define SCC_7 0x0111
+#define SCC_8 0x1f51
+#define SCC_9 0x1b51
 
 
 
 int writeChar(char ch, int pos);
 void LCD_Init(void);
+void writeLong(long i);
+void primes();
+bool is_prime(long i);
+int main(void);
 
 int main(void)
 {
 	CLKPR = 0x80;
 	CLKPR = 0x00;
     LCD_Init();
-	writeChar('0',1);
+	writeChar('3',2);
+	long a = 123;
+	writeLong(a);
 
     
 }
@@ -49,18 +57,28 @@ void LCD_Init(void){
 	*/
 }
 void writeLong(long i) {
-	int exp = 2;
+	int exp = 0;
+	writeChar('3', 0);
 	long dum = i % 10;
-	while (exp < 7 && dum < i) {
-		writeChar((char)dum, exp-2);
-		dum = i % 10^exp;
+	
+	/*char arr[7];
+	int i = 9999;
+	
+	sprintf(arr, "%04d", i);
+	
+	printf("%s", arr);*/
+	
+	while (exp < 6) {
+		writeChar((char)dum, 5 - exp);
+		i = floor(i / 10);
+		dum = i % 10;
 		exp += 1;
 	}
 	
 }
 
 void primes() {
-	for(long count=52; count < 58; count+= 1) {
+	for(long count=3; count < 58; count+= 1) {
 		if (is_prime(count))
 			writeLong(count);
 	}
@@ -71,7 +89,7 @@ void primes() {
 bool is_prime(long i) {
 	int n = 2;
 	while (i % n != 0){
-		if (i - 1 = n) return true;
+		if (i - 1 == n) return true;
 		n += 1;
 	}
 	return false;
@@ -121,39 +139,39 @@ int writeChar(char ch, int pos){
 	switch(pos){
 	case 0:
 		LCDDR0=(SCC_X & 0xF);
-		LCDDR5=(SCC_X & 0xF0)<<4;
-		LCDDR10=(SCC_X & 0xF00)<<8;
-		LCDDR15=(SCC_X & 0xF000)<<12;
+		LCDDR5=(SCC_X & 0xF0)>>4;
+		LCDDR10=(SCC_X & 0xF00)>>8;
+		LCDDR15=(SCC_X & 0xF000)>>12;
 		break;
 	case 1:
 		LCDDR0=(SCC_X & 0xF)<<4;  //0000 1111     0001 0101 0101 0001
 		LCDDR5=(SCC_X & 0xF0);
 		LCDDR10=(SCC_X & 0xF00)>>4;
-		LCDDR15=(SCC_X & 0xF000)>>12;
+		LCDDR15=(SCC_X & 0xF000)>>8;
 		break;
 	case 2:
 		LCDDR1=(SCC_X & 0xF);
-		LCDDR6=(SCC_X & 0xF0);
-		LCDDR11=(SCC_X & 0xF00);
-		LCDDR16=(SCC_X & 0xF000);
+		LCDDR6=(SCC_X & 0xF0)>>4;
+		LCDDR11=(SCC_X & 0xF00)>>8;
+		LCDDR16=(SCC_X & 0xF000)>>12;
 		break;
 	case 3:
 		LCDDR1=(SCC_X & 0xF)<<4;
-		LCDDR6=(SCC_X & 0xF0)<<4;
-		LCDDR11=(SCC_X & 0xF00)<<4;
-		LCDDR16=(SCC_X & 0xF000)<<4;
+		LCDDR6=(SCC_X & 0xF0);
+		LCDDR11=(SCC_X & 0xF00)>>4;
+		LCDDR16=(SCC_X & 0xF000)>>8;
 		break;
 	case 4:
 		LCDDR2=(SCC_X & 0xF);
-		LCDDR7=(SCC_X & 0xF0);
-		LCDDR12=(SCC_X & 0xF00);
-		LCDDR17=(SCC_X & 0xF000);
+		LCDDR7=(SCC_X & 0xF0)>>4;
+		LCDDR12=(SCC_X & 0xF00)>>8;
+		LCDDR17=(SCC_X & 0xF000)>>12;
 		break;
 	case 5:
 		LCDDR2=(SCC_X & 0xF)<<4;
-		LCDDR7=(SCC_X & 0xF0)<<4;
-		LCDDR12=(SCC_X & 0xF00)<<4;
-		LCDDR17=(SCC_X & 0xF000)<<4;
+		LCDDR7=(SCC_X & 0xF0);
+		LCDDR12=(SCC_X & 0xF00)>>4;
+		LCDDR17=(SCC_X & 0xF000)>>8;
 		break;
 	default:
 		return 1;
