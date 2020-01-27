@@ -7,6 +7,7 @@
 #include <avr/io.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #define SCC_0 0x1551
 #define SCC_1 0x0110
@@ -36,17 +37,47 @@ int main(void)
 
 void LCD_Init(void){
 
-	/*LCDCRB = (1<<LCDMUX1)|(1<<LCDMUX0)|(1<<LCDPM2)|(1<<LCDPM1)|(1<<LCDPM2);
+	LCDCRB = (1<<LCDMUX1)|(1<<LCDMUX0)|(1<<LCDPM2)|(1<<LCDPM1)|(1<<LCDPM2);
 	LCDFRR = (0<<LCDPS2)|(0<<LCDPS1)|(0<<LCDPS0)|(1<<LCDCD2)|(1<<LCDCD1)|(1<<LCDCD0);
 	LCDCCR = (0<<LCDDC2)|(0<<LCDDC1)|(0<<LCDDC0)|(1<<LCDCC3)|(1<<LCDCC2)|(1<<LCDCC1)|(1<<LCDCC0);
 	LCDCRA = (1<<LCDEN)|(1<<LCDAB)|(0<<LCDIE)|(0<<LCDBL);
-	*/
-	LCDCRA= (1<<LCDEN) | (1<<LCDAB);
+	
+	/*LCDCRA= (1<<LCDEN) | (1<<LCDAB);
 	LCDCRB= (1<<LCDMUX1) | (1<<LCDMUX0) | (1<<LCDPM2) | (1<<LCDPM1) | (1<<LCDPM0) | (1<<LCDCS);
 	LCDCCR= (1<<LCDCC3) | (1<<LCDCC2) | (1<<LCDCC1) | (1<<LCDCC0);
 	LCDFRR= (1<<LCDCD2) | (1<<LCDCD1) | (1<<LCDCD0);
+	*/
+}
+void writeLong(long i) {
+	int exp = 2;
+	long dum = i % 10;
+	while (exp < 7 && dum < i) {
+		writeChar((char)dum, exp-2);
+		dum = i % 10^exp;
+		exp += 1;
+	}
 	
 }
+
+void primes() {
+	for(long count=52; count < 58; count+= 1) {
+		if (is_prime(count))
+			writeLong(count);
+	}
+	
+}
+
+
+bool is_prime(long i) {
+	int n = 2;
+	while (i % n != 0){
+		if (i - 1 = n) return true;
+		n += 1;
+	}
+	return false;
+	
+}
+
 
 int writeChar(char ch, int pos){
 	int SCC_X = 0;
@@ -129,4 +160,3 @@ int writeChar(char ch, int pos){
 	}
 	return 0;
 }
-
