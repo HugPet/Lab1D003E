@@ -7,7 +7,6 @@
  */ 
 #include <avr/io.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
@@ -30,7 +29,7 @@ void LCD_Init(void);
 void writeLong(long i);
 void primes();
 bool is_prime(long i);
-void writeReg(int num, int reg, bool shift);
+int writeReg(int num, int reg, bool shift);
 int main(void);
 
 int main(void)
@@ -38,12 +37,13 @@ int main(void)
 	CLKPR = 0x80;
 	CLKPR = 0x00;
     LCD_Init();
-	//writeChar('3',2);
-	long a = 12345;
-	writeLong(a);
+	//writeChar('3',0);
+	//long a = 32;
+	//writeLong(a);
     //writeChar('4',4);
 	//writeChar('6',3);
 	//writeChar('9',5);
+	primes();
 }
 
 void LCD_Init(void){
@@ -53,32 +53,20 @@ void LCD_Init(void){
 	LCDCCR = (0<<LCDDC2)|(0<<LCDDC1)|(0<<LCDDC0)|(1<<LCDCC3)|(1<<LCDCC2)|(1<<LCDCC1)|(1<<LCDCC0);
 	LCDCRA = (1<<LCDEN)|(1<<LCDAB)|(0<<LCDIE)|(0<<LCDBL);
 	
-	/*LCDCRA= (1<<LCDEN) | (1<<LCDAB);
-	LCDCRB= (1<<LCDMUX1) | (1<<LCDMUX0) | (1<<LCDPM2) | (1<<LCDPM1) | (1<<LCDPM0) | (1<<LCDCS);
-	LCDCCR= (1<<LCDCC3) | (1<<LCDCC2) | (1<<LCDCC1) | (1<<LCDCC0);
-	LCDFRR= (1<<LCDCD2) | (1<<LCDCD1) | (1<<LCDCD0);
-	*/
 }
 void writeLong(long i) {
-	//int exp = 0;
-	char arr[7] = {'1','2','3','4','5','6'};
-	//sprintf(arr, "%04ld", i);
-	writeChar(arr[5], 5);
-	writeChar(arr[4], 4);
-	writeChar(arr[3], 3);
-	writeChar(arr[2], 2);
-	writeChar(arr[1], 1);
-	writeChar(arr[0], 0);
-	
-	/*while (exp < 6) {
+	int n = 0;
+	while (n < 6) {
+		int temp = i % 10;
+		writeChar((char)temp + '0', 5-n);
+		i = floor(i / 10);
+		n += 1;
 		
-		exp = exp + 1;
-	}*/
-	
+	}	
 }
 
 void primes() {
-	for(long count=3; count < 58; count+= 1) {
+	for(long count=0; count < 50000; count+= 1) {
 		if (is_prime(count))
 			writeLong(count);
 	}
@@ -88,7 +76,7 @@ void primes() {
 
 bool is_prime(long i) {
 	int n = 2;
-	while (i % n != 0){
+	while (i % n != 0 && i > 1){
 		if (i - 1 == n) return true;
 		n += 1;
 	}
@@ -117,50 +105,50 @@ int writeChar(char ch, int pos){
 		break;
 	case '2' :
 		SCC_X_0 = 0x1;
-		SCC_X_1 = 0xE;
-		SCC_X_2 = 0x1;
+		SCC_X_1 = 0x1;
+		SCC_X_2 = 0xE;
 		SCC_X_3 = 0x1;
 		break;
 	case '3' :
 		SCC_X_0 = 0x1;
-		SCC_X_1 = 0xb;
-		SCC_X_2 = 0x1;
+		SCC_X_1 = 0x1;
+		SCC_X_2 = 0xb;
 		SCC_X_3 = 0x1;
 		break;
 	case '4' :
 		SCC_X_0 = 0x0;
-		SCC_X_1 = 0xb;
-		SCC_X_2 = 0x5;
+		SCC_X_1 = 0x5;
+		SCC_X_2 = 0xb;
 		SCC_X_3 = 0x0;
 		break;
 	case '5' :
-		SCC_X_0 = 0x0;
-		SCC_X_1 = 0xb;
-		SCC_X_2 = 0x4;
+		SCC_X_0 = 0x1;
+		SCC_X_1 = 0x4;
+		SCC_X_2 = 0xb;
 		SCC_X_3 = 0x1;
 		break;
 	case '6' :
-		SCC_X_0 = 0x0;
-		SCC_X_1 = 0xf;
-		SCC_X_2 = 0x4;
+		SCC_X_0 = 0x1;
+		SCC_X_1 = 0x4;
+		SCC_X_2 = 0xf;
 		SCC_X_3 = 0x1;
 		break;
 	case '7' :
-		SCC_X_0 = 0x0;
+		SCC_X_0 = 0x1;
 		SCC_X_1 = 0x1;
 		SCC_X_2 = 0x1;
-		SCC_X_3 = 0x1;
+		SCC_X_3 = 0x0;
 		break;
 	case '8' :
 		SCC_X_0 = 0x1;
-		SCC_X_1 = 0xf;
-		SCC_X_2 = 0x5;
+		SCC_X_1 = 0x5;
+		SCC_X_2 = 0xf;
 		SCC_X_3 = 0x1;
 		break;
 	case '9' :
 		SCC_X_0 = 0x1;
-		SCC_X_1 = 0xb;
-		SCC_X_2 = 0x5;
+		SCC_X_1 = 0x5;
+		SCC_X_2 = 0xb;
 		SCC_X_3 = 0x1;
 		break;
 	default:
@@ -181,28 +169,28 @@ int writeChar(char ch, int pos){
 		LCDDR15=writeReg(SCC_X_3, LCDDR15, true);
 		break;
 	case 2:
-		writeReg(SCC_X_0, LCDDR1, false);
-		writeReg(SCC_X_1, LCDDR6, false);
-		writeReg(SCC_X_2, LCDDR11, false);
-		writeReg(SCC_X_3, LCDDR16, false);
+		LCDDR1 = writeReg(SCC_X_0, LCDDR1, false);
+		LCDDR6 = writeReg(SCC_X_1, LCDDR6, false);
+		LCDDR11 = writeReg(SCC_X_2, LCDDR11, false);
+		LCDDR16 = writeReg(SCC_X_3, LCDDR16, false);
 		break;
 	case 3:
-		writeReg(SCC_X_0, LCDDR1, true);
-		writeReg(SCC_X_1, LCDDR6, true);
-		writeReg(SCC_X_2, LCDDR11, true);
-		writeReg(SCC_X_3, LCDDR16, true);
+		LCDDR1 = writeReg(SCC_X_0, LCDDR1, true);
+		LCDDR6 = writeReg(SCC_X_1, LCDDR6, true);
+		LCDDR11 = writeReg(SCC_X_2, LCDDR11, true);
+		LCDDR16 = writeReg(SCC_X_3, LCDDR16, true);
 		break;
 	case 4:
-		writeReg(SCC_X_0, LCDDR2, false);
-		writeReg(SCC_X_1, LCDDR7, false);
-		writeReg(SCC_X_2, LCDDR12, false);
-		writeReg(SCC_X_3, LCDDR17, false);
+		LCDDR2 = writeReg(SCC_X_0, LCDDR2, false);
+		LCDDR7 = writeReg(SCC_X_1, LCDDR7, false);
+		LCDDR12 = writeReg(SCC_X_2, LCDDR12, false);
+		LCDDR17 = writeReg(SCC_X_3, LCDDR17, false);
 		break;
 	case 5:
-		writeReg(SCC_X_0, LCDDR2, true);
-		writeReg(SCC_X_1, LCDDR7, true);
-		writeReg(SCC_X_2, LCDDR12, true);
-		writeReg(SCC_X_3, LCDDR17, true);
+		LCDDR2 = writeReg(SCC_X_0, LCDDR2, true);
+		LCDDR7 = writeReg(SCC_X_1, LCDDR7, true);
+		LCDDR12 = writeReg(SCC_X_2, LCDDR12, true);
+		LCDDR17 = writeReg(SCC_X_3, LCDDR17, true);
 		break;
 	default:
 		return 1;
