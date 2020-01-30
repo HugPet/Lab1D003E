@@ -169,16 +169,16 @@ int writeChar(char ch, int pos){
 	
 	switch(pos){
 	case 0:
-		writeReg(SCC_X_0, LCDDR0, false);
-		writeReg(SCC_X_1, LCDDR5, false);
-		writeReg(SCC_X_2, LCDDR10, false);
-		writeReg(SCC_X_3, LCDDR15, false);		
+		LCDDR0=writeReg(SCC_X_0, LCDDR0, false);
+		LCDDR5=writeReg(SCC_X_1, LCDDR5, false);
+		LCDDR10=writeReg(SCC_X_2, LCDDR10, false);
+		LCDDR15=writeReg(SCC_X_3, LCDDR15, false);		
 		break;
 	case 1:
-		writeReg(SCC_X_0, LCDDR0, true);
-		writeReg(SCC_X_1, LCDDR5, true);
-		writeReg(SCC_X_2, LCDDR10, true);
-		writeReg(SCC_X_3, LCDDR15, true);
+		LCDDR0=writeReg(SCC_X_0, LCDDR0, true);
+		LCDDR5=writeReg(SCC_X_1, LCDDR5, true);
+		LCDDR10=writeReg(SCC_X_2, LCDDR10, true);
+		LCDDR15=writeReg(SCC_X_3, LCDDR15, true);
 		break;
 	case 2:
 		writeReg(SCC_X_0, LCDDR1, false);
@@ -210,7 +210,7 @@ int writeChar(char ch, int pos){
 	return 0;
 }
 
-void writeReg(int num, int reg, bool shift){
+int writeReg(int num, int reg, bool shift){
 	if(!shift){
 		reg = reg & 0xF0;
 		reg = reg | num;
@@ -219,4 +219,5 @@ void writeReg(int num, int reg, bool shift){
 		reg = reg & 0x0F;
 		reg = reg | (num<<4);
 	}
+	return reg;
 }
