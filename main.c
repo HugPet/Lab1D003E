@@ -32,23 +32,31 @@ bool is_prime(long i);
 int writeReg(int num, int reg, bool shift);
 int main(void);
 
-void blink() {
-	int wait = 0x7FFF;
-	bool swi = true;
+void button() {
+	unsigned char i;
 	while(1) {
-		if (TCNT1 == wait && swi) {
+		i = (PINB & 0x40);
+		if (i != 0x40) {
+			LCDDR2 = 0x06;
+		} else {
+			LCDDR2 = 0x60;
+		}
+	}
+}
+
+void blink() {
+	int wait = 0x7FFF;  // Half of 0xFFFF
+	while(1) {
+		if (TCNT1 == wait) {  // if the clock has come to the time set, turn on the segment. (0x7FFF)
 			LCDDR0 = 0x6;
 			LCDDR3 = 0x1;
 			LCDDR8 = 0x1;
 		}
-		else if(TCNT1 == 2*wait && !swi) {
+		else if(TCNT1 == 2*wait) {  // if the clock has come to two times the time set, turn off segment. (0xFFFF)
 			LCDDR0 = 0x0;
 			LCDDR3 = 0x0;
 			LCDDR8 = 0x0;
 		}
-		swi = !swi;
-	//LCDDR13 = 0x1;
-	//LCDDR18 = 0x1;
 	}
 }
 
@@ -57,14 +65,9 @@ int main(void)
 	CLKPR = 0x80;
 	CLKPR = 0x00;
     LCD_Init();
-	blink();
-	//writeChar('3',0);
-	//long a = 32;
-	//writeLong(a);
-    //writeChar('4',4);
-	//writeChar('6',3);
-	//writeChar('9',5);
-	//primes();
+	button();	//Task 3
+	//blink();  //Task 2
+	//primes(); //Task 1
 }
 
 void LCD_Init(void){
@@ -76,15 +79,18 @@ void LCD_Init(void){
 	
 	TCCR1B = (0<<WGM12)|(1<<CS12)|(0<<CS11)|(0<<CS10);
 	
+	DDRB = (1 << DDB7);
+	PORTB = (1 << PB7);
+	MCUCR = (0 << PUD);
+	
 }
 void writeLong(long i) {
 	int n = 0;
-	while (n < 6) {
+	while (n < 6) {		// a while loop for getting the first 6 digits of a number.
 		int temp = i % 10;
 		writeChar((char)temp + '0', 5-n);
 		i = floor(i / 10);
 		n += 1;
-		
 	}	
 }
 
@@ -93,13 +99,12 @@ void primes() {
 		if (is_prime(count))
 			writeLong(count);
 	}
-	
 }
 
 
 bool is_prime(long i) {
 	int n = 2;
-	while (i % n != 0 && i > 1){
+	while (i % n != 0 && i > 1){	// uses an inefficient but standard way of looking for primes.
 		if (i - 1 == n) return true;
 		n += 1;
 	}
@@ -111,7 +116,9 @@ bool is_prime(long i) {
 int writeChar(char ch, int pos){
 	int SCC_X_0 = 0, SCC_X_1 = 0, SCC_X_2 = 0, SCC_X_3 = 0;
 		
-	switch (ch)
+	switch (ch)					/* a switch statement for which character is to be printed on the display.
+								   sets various bytes of SCC_X to certain values, depending on which areas
+								   should light up. These values are derived from the documentation.    */
 	{
 	case '0' :
 		SCC_X_0 = 0x1;
@@ -178,7 +185,10 @@ int writeChar(char ch, int pos){
 		return 2;
 	}
 	
-	switch(pos){
+	switch(pos){										/* a switch statement for the position of the digit. Depending on the position 
+														   we will write to different registers. We use a boolean value to show if 
+														   the lower byte of the register or not, since the positions are paired up 
+														   per register. */
 	case 0:
 		LCDDR0=writeReg(SCC_X_0, LCDDR0, false);
 		LCDDR5=writeReg(SCC_X_1, LCDDR5, false);
@@ -221,6 +231,9 @@ int writeChar(char ch, int pos){
 	return 0;
 }
 
+
+/* A function for writing to a register, specifically the registers for 
+   lighting up areas of the display. **/
 int writeReg(int num, int reg, bool shift){
 	if(!shift){
 		reg = reg & 0xF0;
