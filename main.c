@@ -32,18 +32,39 @@ bool is_prime(long i);
 int writeReg(int num, int reg, bool shift);
 int main(void);
 
+void blink() {
+	int wait = 0x7FFF;
+	bool swi = true;
+	while(1) {
+		if (TCNT1 == wait && swi) {
+			LCDDR0 = 0x6;
+			LCDDR3 = 0x1;
+			LCDDR8 = 0x1;
+		}
+		else if(TCNT1 == 2*wait && !swi) {
+			LCDDR0 = 0x0;
+			LCDDR3 = 0x0;
+			LCDDR8 = 0x0;
+		}
+		swi = !swi;
+	//LCDDR13 = 0x1;
+	//LCDDR18 = 0x1;
+	}
+}
+
 int main(void)
 {
 	CLKPR = 0x80;
 	CLKPR = 0x00;
     LCD_Init();
+	blink();
 	//writeChar('3',0);
 	//long a = 32;
 	//writeLong(a);
     //writeChar('4',4);
 	//writeChar('6',3);
 	//writeChar('9',5);
-	primes();
+	//primes();
 }
 
 void LCD_Init(void){
@@ -52,6 +73,8 @@ void LCD_Init(void){
 	LCDFRR = (0<<LCDPS2)|(0<<LCDPS1)|(0<<LCDPS0)|(1<<LCDCD2)|(1<<LCDCD1)|(1<<LCDCD0);
 	LCDCCR = (0<<LCDDC2)|(0<<LCDDC1)|(0<<LCDDC0)|(1<<LCDCC3)|(1<<LCDCC2)|(1<<LCDCC1)|(1<<LCDCC0);
 	LCDCRA = (1<<LCDEN)|(1<<LCDAB)|(0<<LCDIE)|(0<<LCDBL);
+	
+	TCCR1B = (0<<WGM12)|(1<<CS12)|(0<<CS11)|(0<<CS10);
 	
 }
 void writeLong(long i) {
