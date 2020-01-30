@@ -7,6 +7,7 @@
  */ 
 #include <avr/io.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
@@ -36,11 +37,12 @@ int main(void)
 	CLKPR = 0x80;
 	CLKPR = 0x00;
     LCD_Init();
-	writeChar('3',2);
-	long a = 123;
+	//writeChar('3',2);
+	long a = 12345;
 	writeLong(a);
-
-    
+    //writeChar('4',4);
+	//writeChar('6',3);
+	//writeChar('9',5);
 }
 
 void LCD_Init(void){
@@ -57,23 +59,20 @@ void LCD_Init(void){
 	*/
 }
 void writeLong(long i) {
-	int exp = 0;
-	writeChar('3', 0);
-	long dum = i % 10;
+	//int exp = 0;
+	char arr[7] = {'1','2','3','4','5','6'};
+	//sprintf(arr, "%04ld", i);
+	writeChar(arr[5], 5);
+	writeChar(arr[4], 4);
+	writeChar(arr[3], 3);
+	writeChar(arr[2], 2);
+	writeChar(arr[1], 1);
+	writeChar(arr[0], 0);
 	
-	/*char arr[7];
-	int i = 9999;
-	
-	sprintf(arr, "%04d", i);
-	
-	printf("%s", arr);*/
-	
-	while (exp < 6) {
-		writeChar((char)dum, 5 - exp);
-		i = floor(i / 10);
-		dum = i % 10;
-		exp += 1;
-	}
+	/*while (exp < 6) {
+		
+		exp = exp + 1;
+	}*/
 	
 }
 
@@ -141,7 +140,7 @@ int writeChar(char ch, int pos){
 		LCDDR0=(SCC_X & 0xF);
 		LCDDR5=(SCC_X & 0xF0)>>4;
 		LCDDR10=(SCC_X & 0xF00)>>8;
-		LCDDR15=(SCC_X & 0xF000)>>12;
+		LCDDR15=(SCC_X & 0xF000)>>12;		//vi skriver över värdena varje gång, blir problem då
 		break;
 	case 1:
 		LCDDR0=(SCC_X & 0xF)<<4;  //0000 1111     0001 0101 0101 0001
