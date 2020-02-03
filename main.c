@@ -4,7 +4,6 @@
  *
  * Created: 2020-01-22 10:12:27
  * Author : josvil-8
- 	    hugpet-8
  */ 
 #include <avr/io.h>
 #include <stdlib.h>
@@ -36,8 +35,8 @@ int main(void);
 void button() {
 	unsigned char i;
 	while(1) {
-		i = (PINB & 0x40);
-		if (i != 0x40) {
+		i = (PINB & 0x80);
+		if (i != 0x80) {
 			LCDDR2 = 0x06;
 		} else {
 			LCDDR2 = 0x60;
@@ -46,18 +45,54 @@ void button() {
 }
 
 void blink() {
-	int wait = 0x7FFF;  // Half of 0xFFFF
+	uint16_t wait = 0x7A12;
+	uint16_t timer;
+	uint16_t lastTime = 0;
 	while(1) {
-		if (TCNT1 == wait) {  // if the clock has come to the time set, turn on the segment. (0x7FFF)
+		timer = (TCNT1 - lastTime);
+		if (timer == wait) {  // if the clock has come to the time set, turn on the segment. (0x7FFF)
 			LCDDR0 = 0x6;
 			LCDDR3 = 0x1;
 			LCDDR8 = 0x1;
 		}
-		else if(TCNT1 == 2*wait) {  // if the clock has come to two times the time set, turn off segment. (0xFFFF)
+		else if(timer == 2*wait) {  // if the clock has come to two times the time set, turn off segment. (0xFFFF)
 			LCDDR0 = 0x0;
 			LCDDR3 = 0x0;
 			LCDDR8 = 0x0;
+			lastTime = timer;
 		}
+	}
+}
+
+void concurr() {
+	unsigned char i;
+	uint16_t n = 2;
+	uint16_t wait = 0x7A12;
+	uint16_t timer;
+	uint16_t lastTime = 0;
+	while(1) {
+		i = PINB & 0x80;
+		if (is_prime(n)) {
+			writeLong(n);
+		}
+		timer = (TCNT1 - lastTime);
+		if (timer > wait) {  // if the clock has come to the time set, turn on the segment. (0x7FFF)
+			LCDDR0 |= 0x6;
+			LCDDR3 |= 0x1;
+			LCDDR8 |= 0x1;
+		}
+		else if(timer < wait) {  // if the clock has come to two times the time set, turn off segment. (0xFFFF)
+			LCDDR0 |= 0x0;
+			LCDDR3 |= 0x0;
+			LCDDR8 |= 0x0;
+			lastTime = timer;
+		}
+		if (i != 0x80) {
+			LCDDR2 |= 0x06;
+		} else {
+			LCDDR2 |= 0x60;
+		}
+		n++;
 	}
 }
 
@@ -66,7 +101,8 @@ int main(void)
 	CLKPR = 0x80;
 	CLKPR = 0x00;
     LCD_Init();
-	button();	//Task 3
+	concurr(); //Task 4
+	//button();	//Task 3
 	//blink();  //Task 2
 	//primes(); //Task 1
 }
@@ -107,7 +143,7 @@ bool is_prime(long i) {
 	int n = 2;
 	while (i % n != 0 && i > 1){	// uses an inefficient but standard way of looking for primes.
 		if (i - 1 == n) return true;
-		n += 1;
+		n++;
 	}
 	return false;
 	
@@ -237,12 +273,12 @@ int writeChar(char ch, int pos){
    lighting up areas of the display. **/
 int writeReg(int num, int reg, bool shift){
 	if(!shift){
-		reg = reg & 0xF0;
-		reg = reg | num;
+		reg &= 0xF0;
+		reg |= num;
 	}
 	else{
-		reg = reg & 0x0F;
-		reg = reg | (num<<4);
+		reg &= 0x0F;
+		reg |= (num<<4);
 	}
 	return reg;
 }
